@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Canvas Example</title>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="1500" height="500"></canvas>
+    <button id="resetButton">Reset</button>
+  </body>
+</html>
+<script>
+  const canvas = document.getElementById("myCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const circleColors = ["red", "green", "blue", "yellow"];
+
+
+  const circles = [
+    { x: 50, y: 50 },
+    { x: 50, y: 100 },
+    { x: 50, y: 150 },
+    { x: 50, y: 200 },
+  ];
+
+  const arrows = [
+    { x: 1400, y: 50 },
+    { x: 1400, y: 100 },
+    { x: 1400, y: 150 },
+    { x: 1400, y: 200 },
+  ];
+
+  let choosedcircle = null;
+  let animationsid = null;
+
+  function drawCircle(position, color) {
+    ctx.beginPath();
+    ctx.arc(position.x, position.y, 20, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function drawArrow(position) {
+    ctx.beginPath();
+    ctx.moveTo(position.x, position.y - 10);
+    ctx.lineTo(position.x - 30, position.y - 10);
+    ctx.lineTo(position.x - 30, position.y - 20);
+    ctx.lineTo(position.x - 50, position.y);
+    ctx.lineTo(position.x - 30, position.y + 20);
+    ctx.lineTo(position.x - 30, position.y + 10);
+    ctx.lineTo(position.x, position.y + 10);
+    ctx.closePath();
+    ctx.fillStyle = "black";
+    ctx.fill();
+  }
+
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function draw() {
+    clearCanvas();
+    for (let i = 0; i < 4; i++) {
+      drawCircle(circles[i], circleColors[i]);
+      drawArrow(arrows[i]);
+    }
+    // start flowing
+    if (choosedcircle !== null) {
+      const arrowPosition = arrows[choosedcircle];
+      const circlePosition = circles[choosedcircle];
+      drawArrow(arrowPosition);
+      arrowPosition.x -= 4;
+      // Changing Colurs and stoping
+      if (arrowPosition.x - 75 <= circlePosition.x) {
+        arrowPosition.x = circlePosition.x + 75;
+        circleColors[choosedcircle] = "pink";
+        choosedcircle = null;
+        cancelAnimationFrame(animationsid);
+      }
+    }
+    animationsid = requestAnimationFrame(draw);
+  }
+
+  function handleClick(event) {
+    for (let i = 0; i < 4; i++) {
+      const circlePosition = circles[i];
+      const distance = Math.sqrt(
+        (circlePosition.x - event.offsetX) ** 2 +
+          (circlePosition.y - event.offsetY) ** 2
+      );
+      // check
+      if (distance <= 20) {
+        choosedcircle = i;
+        break;
+      }
+    }
+  }
+
+
+  function handleReset() {
+    circleColors[0] = "red";
+    circleColors[1] = "green";
+    circleColors[2] = "blue";
+    circleColors[3] = "yellow";
+    window.location.reload();
+  }
+
+ 
+  canvas.addEventListener("click", handleClick);
+  document.getElementById("resetButton").addEventListener("click", handleReset);
+  draw();
+</script>
